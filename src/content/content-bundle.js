@@ -49,6 +49,10 @@
       this.debugDiv = null;
       this.currentSubtitle = "";
       this.translationCache = new Map();
+      this.subtitleStartTime = null;
+      this.subtitleEndTime = null;
+      this.displayTimeout = null;
+      this.lastTranslationShowTime = null;
       this.init();
     }
 
@@ -231,10 +235,44 @@
       this.updateDebug(summary, isError, fullDetails);
     }
 
+    hideTranslation() {
+      this.subtitleDiv.style.display = "none";
+      this.lastTranslationShowTime = null;
+      console.log("Translation hidden");
+    }
+
     async displaySubtitle(text) {
+      // Handle subtitle ending
       if (!text || text === "") {
-        this.subtitleDiv.style.display = "none";
+        // Record when the subtitle ended
+        if (this.currentSubtitle && this.subtitleStartTime) {
+          this.subtitleEndTime = performance.now();
+          const originalDuration = this.subtitleEndTime - this.subtitleStartTime;
+          console.log(`Original subtitle displayed for ${originalDuration.toFixed(0)}ms`);
+          
+          // If translation is showing, keep it visible for the full original duration
+          if (this.lastTranslationShowTime) {
+            const translationAge = performance.now() - this.lastTranslationShowTime;
+            const remainingTime = originalDuration - translationAge;
+            
+            console.log(`Translation has been showing for ${translationAge.toFixed(0)}ms, keeping visible for ${remainingTime.toFixed(0)}ms more`);
+            
+            if (this.displayTimeout) {
+              clearTimeout(this.displayTimeout);
+            }
+            
+            if (remainingTime > 0) {
+              this.displayTimeout = setTimeout(() => {
+                this.hideTranslation();
+              }, remainingTime);
+            } else {
+              // Translation has already been shown long enough
+              this.hideTranslation();
+            }
+          }
+        }
         this.currentSubtitle = "";
+        this.subtitleStartTime = null;
         return;
       }
 
@@ -243,6 +281,15 @@
         return;
       }
 
+      // Clear any existing display timeout
+      if (this.displayTimeout) {
+        clearTimeout(this.displayTimeout);
+        this.displayTimeout = null;
+      }
+
+      // Record when this new subtitle started
+      this.subtitleStartTime = performance.now();
+      
       // Update current subtitle
       this.currentSubtitle = text;
 
@@ -363,12 +410,19 @@
       this.subtitleDiv.style.display = "block";
       this.subtitleDiv.textContent = ""; // Clear any existing content
       this.subtitleDiv.innerHTML = ""; // Ensure it's completely empty
+      
+      // Track when we show this translation
+      this.lastTranslationShowTime = performance.now();
 
       // Show final result in debug
       const totalTime = (performance.now() - startTime).toFixed(1);
       this.updateDebug(
         `✨ [${translationMethod.toUpperCase()}] Result: "${translation.substring(0, 40)}..." (${totalTime}ms total)`
       );
+      
+      // Calculate how long the translation arrived after the subtitle started
+      const translationDelay = performance.now() - this.subtitleStartTime;
+      console.log(`Translation arrived ${translationDelay.toFixed(0)}ms after subtitle start`);
 
       // Create clickable words
       const words = translation.split(/\s+/);
