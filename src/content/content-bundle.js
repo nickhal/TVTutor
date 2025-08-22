@@ -554,6 +554,14 @@
         )}ms after subtitle start`
       );
 
+      // Check if translation is identical to original (e.g., names like "Nezuko")
+      if (translation.toLowerCase().trim() === text.toLowerCase().trim()) {
+        console.log("Translation identical to original, hiding translation");
+        this.subtitleDiv.style.display = "none";
+        this.updateDebug("🔄 Translation same as original - hidden");
+        return;
+      }
+
       // Display the translation text (simple, Netflix-like)
       this.subtitleDiv.textContent = translation;
 
