@@ -465,8 +465,8 @@
           spanStyle?.fontWeight || netflixStyle.fontWeight || "700";
         this.subtitleDiv.style.letterSpacing = netflixStyle.letterSpacing;
         this.subtitleDiv.style.lineHeight = netflixStyle.lineHeight;
-        this.subtitleDiv.style.color =
-          spanStyle?.color || netflixStyle.color || "white";
+        // Use high contrast subtitle yellow to distinguish from original
+        this.subtitleDiv.style.color = "#FFFF00"; // Bright subtitle yellow
 
         // Get text shadow from the actual text span, not container
         const textShadow = spanStyle?.textShadow || netflixStyle.textShadow;
