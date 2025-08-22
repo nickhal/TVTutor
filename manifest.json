@@ -18,8 +18,7 @@
   ],
   
   "background": {
-    "service_worker": "src/background/service-worker.js",
-    "type": "module"
+    "service_worker": "src/background/service-worker-bundle.js"
   },
   
   "content_scripts": [{
@@ -27,9 +26,9 @@
       "https://*.netflix.com/*",
       "https://*.youtube.com/*"
     ],
-    "js": ["src/content/content-script.js"],
+    "js": ["src/content/content-bundle.js"],
     "css": ["src/ui/styles/overlay.css"],
-    "run_at": "document_start",
+    "run_at": "document_end",
     "all_frames": false
   }],
   

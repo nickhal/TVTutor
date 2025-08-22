@@ -2,7 +2,8 @@ import { STORAGE_KEYS } from '../shared/constants.js';
 
 export class StorageManager {
   constructor() {
-    this.useLocalStorage = true; // Use localStorage for MVP
+    // Detect if we're running in a service worker or content script context
+    this.useLocalStorage = typeof localStorage !== 'undefined';
   }
   
   async saveWord(wordData) {
