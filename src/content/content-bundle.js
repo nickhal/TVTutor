@@ -44,7 +44,6 @@
   // Overlay Manager
   class OverlayManager {
     constructor() {
-      this.container = null;
       this.subtitleDiv = null;
       this.debugDiv = null;
       this.currentSubtitle = "";
@@ -57,35 +56,12 @@
     }
 
     init() {
-      // Create main container
-      this.container = document.createElement("div");
-      this.container.className = "indonesian-learning-overlay";
-      this.container.style.cssText = `
-        position: fixed;
-        bottom: 120px;
-        left: 50%;
-        transform: translateX(-50%);
-        z-index: 999999;
-        pointer-events: none;
-        width: 80%;
-        max-width: 800px;
-      `;
-
-      // Create subtitle display
+      // Create subtitle display that will be positioned relative to Netflix subtitles
       this.subtitleDiv = document.createElement("div");
-      this.subtitleDiv.className = "subtitle-display";
-      this.subtitleDiv.style.cssText = `
-        background: rgba(0, 0, 0, 0.5);
-        color: white;
-        padding: 15px 20px;
-        border-radius: 8px;
-        font-size: 20px;
-        text-align: center;
-        pointer-events: auto;
-        margin-bottom: 10px;
-        backdrop-filter: blur(10px);
-        display: none;
-      `;
+      this.subtitleDiv.className = "indonesian-translation-subtitle";
+      // We'll set most styles dynamically when we find the Netflix container
+
+      // Don't append yet - we'll inject it near Netflix subtitles when they appear
 
       // Create debug panel
       this.debugDiv = document.createElement("div");
@@ -109,26 +85,29 @@
         user-select: text;
         cursor: default;
       `;
-      this.debugDiv.innerHTML = "<b>Debug Panel</b><br>Waiting for subtitles...";
+      this.debugDiv.innerHTML =
+        "<b>Debug Panel</b><br>Waiting for subtitles...";
       this.debugLog = [];
       this.debugEntries = []; // Store raw data for copying
-      
+
       // Add click handler for copying
-      this.debugDiv.addEventListener('click', (e) => {
+      this.debugDiv.addEventListener("click", (e) => {
         // Check if clicked on an error line
-        const line = e.target.closest('.debug-line');
+        const line = e.target.closest(".debug-line");
         if (line && line.dataset.message) {
           // Copy to clipboard
-          navigator.clipboard.writeText(line.dataset.message).then(() => {
-            // Show feedback
-            const original = line.style.background;
-            line.style.background = 'rgba(0, 255, 0, 0.2)';
-            line.style.transition = 'background 0.3s';
-            
-            // Create "Copied!" tooltip
-            const tooltip = document.createElement('div');
-            tooltip.textContent = '📋 Copied!';
-            tooltip.style.cssText = `
+          navigator.clipboard
+            .writeText(line.dataset.message)
+            .then(() => {
+              // Show feedback
+              const original = line.style.background;
+              line.style.background = "rgba(0, 255, 0, 0.2)";
+              line.style.transition = "background 0.3s";
+
+              // Create "Copied!" tooltip
+              const tooltip = document.createElement("div");
+              tooltip.textContent = "📋 Copied!";
+              tooltip.style.cssText = `
               position: absolute;
               background: #0f0;
               color: #000;
@@ -140,37 +119,37 @@
               z-index: 9999999;
               animation: fadeOut 1s forwards;
             `;
-            
-            // Add animation
-            const style = document.createElement('style');
-            style.textContent = `
+
+              // Add animation
+              const style = document.createElement("style");
+              style.textContent = `
               @keyframes fadeOut {
                 0% { opacity: 1; transform: translateY(0); }
                 100% { opacity: 0; transform: translateY(-10px); }
               }
             `;
-            document.head.appendChild(style);
-            
-            // Position tooltip
-            const rect = line.getBoundingClientRect();
-            tooltip.style.left = rect.left + 'px';
-            tooltip.style.top = (rect.top - 30) + 'px';
-            document.body.appendChild(tooltip);
-            
-            // Clean up
-            setTimeout(() => {
-              line.style.background = original;
-              tooltip.remove();
-              style.remove();
-            }, 1000);
-          }).catch(err => {
-            console.error('Failed to copy:', err);
-          });
+              document.head.appendChild(style);
+
+              // Position tooltip
+              const rect = line.getBoundingClientRect();
+              tooltip.style.left = rect.left + "px";
+              tooltip.style.top = rect.top - 30 + "px";
+              document.body.appendChild(tooltip);
+
+              // Clean up
+              setTimeout(() => {
+                line.style.background = original;
+                tooltip.remove();
+                style.remove();
+              }, 1000);
+            })
+            .catch((err) => {
+              console.error("Failed to copy:", err);
+            });
         }
       });
 
-      this.container.appendChild(this.subtitleDiv);
-      document.body.appendChild(this.container);
+      // Only append debug div initially
       document.body.appendChild(this.debugDiv);
 
       console.log("Overlay initialized");
@@ -179,15 +158,15 @@
     updateDebug(message, isError = false, fullDetails = null) {
       if (this.debugDiv) {
         const time = new Date().toLocaleTimeString();
-        const color = isError ? '#f00' : '#0f0';
-        
+        const color = isError ? "#f00" : "#0f0";
+
         // Use full details for copying if provided, otherwise use message
         const copyText = fullDetails || message;
-        
+
         // Create clickable line with full message in data attribute
         const entry = `
           <div class="debug-line" 
-               data-message="${copyText.replace(/"/g, '&quot;')}"
+               data-message="${copyText.replace(/"/g, "&quot;")}"
                style="
                  padding: 2px 4px;
                  margin: 1px 0;
@@ -198,20 +177,24 @@
                onmouseover="this.style.background='rgba(255,255,255,0.1)'"
                onmouseout="this.style.background='transparent'">
             <span style="color: ${color}">[${time}] ${message}</span>
-            ${fullDetails ? '<span style="color: #888; font-size: 10px;"> (click for full details)</span>' : ''}
+            ${
+              fullDetails
+                ? '<span style="color: #888; font-size: 10px;"> (click for full details)</span>'
+                : ""
+            }
           </div>
         `;
-        
+
         // Add to log
         this.debugLog.push(entry);
         this.debugEntries.push({ time, message, isError, fullDetails });
-        
+
         // Keep only last 10 entries
         if (this.debugLog.length > 10) {
           this.debugLog.shift();
           this.debugEntries.shift();
         }
-        
+
         // Update display
         this.debugDiv.innerHTML = `
           <div style="
@@ -226,11 +209,11 @@
             <b>🔍 Translation Debug Panel</b>
             <span style="font-size: 10px; color: #888;">Click any line to copy</span>
           </div>
-          ${this.debugLog.join('')}
+          ${this.debugLog.join("")}
         `;
       }
     }
-    
+
     updateDebugWithDetails(summary, fullDetails, isError = false) {
       this.updateDebug(summary, isError, fullDetails);
     }
@@ -247,20 +230,28 @@
         // Record when the subtitle ended
         if (this.currentSubtitle && this.subtitleStartTime) {
           this.subtitleEndTime = performance.now();
-          const originalDuration = this.subtitleEndTime - this.subtitleStartTime;
-          console.log(`Original subtitle displayed for ${originalDuration.toFixed(0)}ms`);
-          
+          const originalDuration =
+            this.subtitleEndTime - this.subtitleStartTime;
+          console.log(
+            `Original subtitle displayed for ${originalDuration.toFixed(0)}ms`
+          );
+
           // If translation is showing, keep it visible for the full original duration
           if (this.lastTranslationShowTime) {
-            const translationAge = performance.now() - this.lastTranslationShowTime;
+            const translationAge =
+              performance.now() - this.lastTranslationShowTime;
             const remainingTime = originalDuration - translationAge;
-            
-            console.log(`Translation has been showing for ${translationAge.toFixed(0)}ms, keeping visible for ${remainingTime.toFixed(0)}ms more`);
-            
+
+            console.log(
+              `Translation has been showing for ${translationAge.toFixed(
+                0
+              )}ms, keeping visible for ${remainingTime.toFixed(0)}ms more`
+            );
+
             if (this.displayTimeout) {
               clearTimeout(this.displayTimeout);
             }
-            
+
             if (remainingTime > 0) {
               this.displayTimeout = setTimeout(() => {
                 this.hideTranslation();
@@ -289,7 +280,7 @@
 
       // Record when this new subtitle started
       this.subtitleStartTime = performance.now();
-      
+
       // Update current subtitle
       this.currentSubtitle = text;
 
@@ -334,7 +325,7 @@
               hasError: !!response?.error,
               errorValue: response?.error,
               responseKeys: response ? Object.keys(response) : [],
-              fullResponse: JSON.stringify(response, null, 2)
+              fullResponse: JSON.stringify(response, null, 2),
             };
 
             // Check for different response formats
@@ -344,13 +335,17 @@
                 translation = response.translation;
                 translationMethod = "chrome-api";
                 this.translationCache.set(text, translation);
-                this.updateDebug(`✅ Chrome Translate API success (${apiTime}ms)`);
+                this.updateDebug(
+                  `✅ Chrome Translate API success (${apiTime}ms)`
+                );
               } else if (response.definition) {
                 // Service worker format with definition field
                 translation = response.definition;
                 translationMethod = response.provider || "google-unofficial";
                 this.translationCache.set(text, translation);
-                this.updateDebug(`✅ Translation success via ${translationMethod} (${apiTime}ms)`);
+                this.updateDebug(
+                  `✅ Translation success via ${translationMethod} (${apiTime}ms)`
+                );
               } else if (response.translation) {
                 // Simple format with just translation
                 translation = response.translation;
@@ -360,16 +355,18 @@
               } else {
                 // No translation available - show error details
                 const errorDetails = {
-                  error: response?.error || 'Unknown format',
-                  response: response
+                  error: response?.error || "Unknown format",
+                  response: response,
                 };
-                
+
                 this.updateDebugWithDetails(
-                  `❌ Translation failed: ${response?.error || 'Unknown format'}`,
+                  `❌ Translation failed: ${
+                    response?.error || "Unknown format"
+                  }`,
                   JSON.stringify(errorDetails, null, 2),
                   true
                 );
-                
+
                 // Fallback to dictionary
                 translation = this.translateIndonesian(text);
                 translationMethod = "dictionary";
@@ -391,9 +388,9 @@
             errorStack: error.stack,
             chromeAvailable: typeof chrome !== "undefined",
             runtimeAvailable: chrome?.runtime,
-            sendMessageAvailable: chrome?.runtime?.sendMessage
+            sendMessageAvailable: chrome?.runtime?.sendMessage,
           };
-          
+
           this.updateDebugWithDetails(
             `❌ Chrome API failed: ${error.message}`,
             JSON.stringify(fullError, null, 2),
@@ -406,60 +403,170 @@
         }
       }
 
+      // Find Netflix subtitle container and copy its styling
+      const netflixContainer = document.querySelector(
+        ".player-timedtext-text-container"
+      );
+      console.log("Netflix container found:", !!netflixContainer);
+
+      if (netflixContainer) {
+        console.log("Netflix container classes:", netflixContainer.className);
+        console.log(
+          "Netflix container parent:",
+          netflixContainer.parentElement
+        );
+
+        // Find the video container to insert our translation
+        const videoContainer =
+          document.querySelector(".watch-video") ||
+          document.querySelector(".VideoContainer") ||
+          document.querySelector("[data-uia='video-canvas']");
+
+        if (
+          videoContainer &&
+          (!this.subtitleDiv.parentElement ||
+            this.subtitleDiv.parentElement !== videoContainer)
+        ) {
+          console.log("Inserting translation into video container");
+          videoContainer.appendChild(this.subtitleDiv);
+          console.log("Translation div inserted into:", videoContainer);
+        }
+
+        // Copy Netflix subtitle styling - get from the actual text spans
+        const netflixStyle = window.getComputedStyle(netflixContainer);
+        // Look for the deepest span with actual text
+        const allSpans = netflixContainer.querySelectorAll("span");
+        let textSpan = null;
+        for (const span of allSpans) {
+          if (span.textContent.trim() && !span.querySelector("span")) {
+            textSpan = span;
+            break;
+          }
+        }
+        const spanStyle = textSpan ? window.getComputedStyle(textSpan) : null;
+
+        console.log("Netflix font:", netflixStyle.fontFamily);
+        console.log("Container size:", netflixStyle.fontSize);
+        console.log("Text span found:", !!textSpan);
+        if (textSpan) {
+          console.log("Text span content:", textSpan.textContent);
+          console.log("Text span font size:", spanStyle.fontSize);
+        }
+
+        // Apply Netflix styling to our translation
+        // Get the actual rendered font size from the text span
+        const actualFontSize = spanStyle?.fontSize || "42px"; // Default to 42px if not found
+        console.log("Using font size:", actualFontSize);
+
+        this.subtitleDiv.style.fontFamily = netflixStyle.fontFamily;
+        this.subtitleDiv.style.fontSize =
+          actualFontSize !== "10px" ? actualFontSize : "42px"; // Use actual size or fallback
+        this.subtitleDiv.style.fontWeight =
+          spanStyle?.fontWeight || netflixStyle.fontWeight || "700";
+        this.subtitleDiv.style.letterSpacing = netflixStyle.letterSpacing;
+        this.subtitleDiv.style.lineHeight = netflixStyle.lineHeight;
+        this.subtitleDiv.style.color =
+          spanStyle?.color || netflixStyle.color || "white";
+
+        // Get text shadow from the actual text span, not container
+        const textShadow = spanStyle?.textShadow || netflixStyle.textShadow;
+        console.log("Netflix text shadow:", textShadow);
+
+        // Netflix typically uses multiple shadows for a strong outline effect
+        this.subtitleDiv.style.textShadow =
+          textShadow ||
+          "rgb(0, 0, 0) 2px 2px 4px, rgb(0, 0, 0) -2px -2px 4px, rgb(0, 0, 0) 2px -2px 4px, rgb(0, 0, 0) -2px 2px 4px";
+
+        // Copy background if Netflix has one
+        if (spanStyle) {
+          this.subtitleDiv.style.backgroundColor =
+            spanStyle.backgroundColor || "transparent";
+          this.subtitleDiv.style.padding = spanStyle.padding || "0";
+        }
+
+        // Set positioning to appear above Netflix subtitle
+        const netflixRect = netflixContainer.getBoundingClientRect();
+        this.subtitleDiv.style.position = "absolute";
+        this.subtitleDiv.style.width = "100%";
+        this.subtitleDiv.style.textAlign = "center";
+        this.subtitleDiv.style.left = "0";
+
+        // Position above the Netflix subtitle based on its location
+        if (netflixRect && netflixRect.bottom > 0) {
+          // Netflix subtitle is visible, position above it
+          const bottomPosition = window.innerHeight - netflixRect.top + 35; // gap between Netflix subtitle and translation
+          this.subtitleDiv.style.bottom = `${bottomPosition}px`;
+        } else {
+          // Fallback position
+          this.subtitleDiv.style.bottom = "150px";
+        }
+
+        this.subtitleDiv.style.pointerEvents = "none"; // Don't block clicks
+        this.subtitleDiv.style.zIndex = "999999"; // High z-index to ensure visibility
+
+        // Log final styles
+        console.log("Translation div styles:", {
+          display: this.subtitleDiv.style.display,
+          position: this.subtitleDiv.style.position,
+          fontSize: this.subtitleDiv.style.fontSize,
+          bottom: this.subtitleDiv.style.bottom,
+          color: this.subtitleDiv.style.color,
+          textShadow: this.subtitleDiv.style.textShadow,
+        });
+      } else {
+        console.warn(
+          "Netflix subtitle container not found! Looking for alternatives..."
+        );
+        // Try alternative selectors
+        const alternatives = [
+          ".player-timedtext",
+          "[class*='timedtext']",
+          "[class*='subtitle']",
+        ];
+        alternatives.forEach((selector) => {
+          const found = document.querySelector(selector);
+          if (found) console.log(`Found with selector ${selector}:`, found);
+        });
+      }
+
       // Clear and display the English translation
       this.subtitleDiv.style.display = "block";
       this.subtitleDiv.textContent = ""; // Clear any existing content
       this.subtitleDiv.innerHTML = ""; // Ensure it's completely empty
-      
+
       // Track when we show this translation
       this.lastTranslationShowTime = performance.now();
 
       // Show final result in debug
       const totalTime = (performance.now() - startTime).toFixed(1);
       this.updateDebug(
-        `✨ [${translationMethod.toUpperCase()}] Result: "${translation.substring(0, 40)}..." (${totalTime}ms total)`
+        `✨ [${translationMethod.toUpperCase()}] Result: "${translation.substring(
+          0,
+          40
+        )}..." (${totalTime}ms total)`
       );
-      
+
       // Calculate how long the translation arrived after the subtitle started
       const translationDelay = performance.now() - this.subtitleStartTime;
-      console.log(`Translation arrived ${translationDelay.toFixed(0)}ms after subtitle start`);
+      console.log(
+        `Translation arrived ${translationDelay.toFixed(
+          0
+        )}ms after subtitle start`
+      );
 
-      // Create clickable words
-      const words = translation.split(/\s+/);
-      const originalWords = text.split(/\s+/);
+      // Display the translation text (simple, Netflix-like)
+      this.subtitleDiv.textContent = translation;
 
-      words.forEach((word, index) => {
-        const span = document.createElement("span");
-        span.textContent = word + " ";
-        span.style.cssText = `
-          cursor: pointer;
-          display: inline;
-          transition: all 0.2s;
-        `;
-
-        // Store original Indonesian word
-        const originalWord =
-          originalWords[index] || originalWords[originalWords.length - 1];
-        span.dataset.original = originalWord;
-
-        span.addEventListener("mouseenter", () => {
-          span.style.backgroundColor = "rgba(59, 130, 246, 0.5)";
-          span.style.padding = "2px 4px";
-          span.style.borderRadius = "4px";
-        });
-
-        span.addEventListener("mouseleave", () => {
-          span.style.backgroundColor = "transparent";
-          span.style.padding = "0";
-        });
-
-        span.addEventListener("click", (e) => {
-          e.stopPropagation();
-          this.handleWordClick(originalWord, text);
-        });
-
-        this.subtitleDiv.appendChild(span);
-      });
+      console.log("Translation set:", translation);
+      console.log("Translation div visible:", this.subtitleDiv.style.display);
+      console.log(
+        "Translation div in DOM:",
+        document.contains(this.subtitleDiv)
+      );
+      console.log(
+        "Translation div computed style:",
+        window.getComputedStyle(this.subtitleDiv).display
+      );
     }
 
     translateIndonesian(text) {
