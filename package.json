@@ -1,0 +1,20 @@
+{
+  "name": "indonesian-learning-extension",
+  "version": "1.0.0",
+  "description": "Chrome extension for learning Indonesian while watching Netflix and YouTube",
+  "private": true,
+  "scripts": {
+    "info": "echo 'This is a Chrome extension - no build required! Load directly in Chrome.'",
+    "help": "echo 'To install: Open chrome://extensions, enable Developer Mode, click Load Unpacked, select this folder'"
+  },
+  "keywords": [
+    "chrome-extension",
+    "indonesian",
+    "language-learning",
+    "netflix",
+    "youtube"
+  ],
+  "author": "",
+  "license": "MIT",
+  "note": "This extension runs directly in Chrome without any build process. No npm install or dependencies needed."
+}

@@ -1,0 +1,3 @@
+/* Empty CSS file - styles are embedded in Shadow DOM via JavaScript */
+/* This file is referenced in manifest.json but actual styles are in overlay-manager.js */
+/* Keeping this file to prevent console errors about missing CSS file */

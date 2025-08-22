@@ -1,0 +1,59 @@
+{
+  "manifest_version": 3,
+  "name": "Indonesian Learning Assistant",
+  "version": "1.0.0",
+  "description": "Learn Indonesian while watching Netflix and YouTube",
+  
+  "permissions": [
+    "storage",
+    "activeTab",
+    "scripting"
+  ],
+  
+  "host_permissions": [
+    "https://*.netflix.com/*",
+    "https://*.youtube.com/*",
+    "https://www.youtube.com/*",
+    "https://libretranslate.com/*"
+  ],
+  
+  "background": {
+    "service_worker": "src/background/service-worker.js",
+    "type": "module"
+  },
+  
+  "content_scripts": [{
+    "matches": [
+      "https://*.netflix.com/*",
+      "https://*.youtube.com/*"
+    ],
+    "js": ["src/content/content-script.js"],
+    "css": ["src/ui/styles/overlay.css"],
+    "run_at": "document_start",
+    "all_frames": false
+  }],
+  
+  "web_accessible_resources": [{
+    "resources": [
+      "src/inject/*.js",
+      "data/*.json",
+      "assets/fonts/*"
+    ],
+    "matches": [
+      "https://*.netflix.com/*",
+      "https://*.youtube.com/*"
+    ]
+  }],
+  
+  "action": {
+    "default_icon": {
+      "16": "assets/icons/icon16.png",
+      "48": "assets/icons/icon48.png",
+      "128": "assets/icons/icon128.png"
+    }
+  },
+  
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  }
+}
