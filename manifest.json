@@ -3,47 +3,43 @@
   "name": "Indonesian Learning Assistant",
   "version": "1.0.0",
   "description": "Learn Indonesian while watching Netflix and YouTube",
-  
-  "permissions": [
-    "storage",
-    "activeTab",
-    "scripting"
-  ],
-  
+  "minimum_chrome_version": "114",
+
+  "permissions": ["storage", "activeTab", "scripting", "downloads"],
+
   "host_permissions": [
     "https://*.netflix.com/*",
     "https://*.youtube.com/*",
     "https://www.youtube.com/*",
-    "https://libretranslate.com/*"
+    "https://translate.googleapis.com/*",
+    "https://libretranslate.com/*",
+    "https://translate.argosopentech.com/*",
+    "https://libretranslate.de/*",
+    "https://api.mymemory.translated.net/*"
   ],
-  
+
   "background": {
-    "service_worker": "src/background/service-worker-bundle.js"
+    "service_worker": "src/background/service-worker.js",
+    "type": "module"
   },
-  
-  "content_scripts": [{
-    "matches": [
-      "https://*.netflix.com/*",
-      "https://*.youtube.com/*"
-    ],
-    "js": ["src/content/content-bundle.js"],
-    "css": ["src/ui/styles/overlay.css"],
-    "run_at": "document_end",
-    "all_frames": false
-  }],
-  
-  "web_accessible_resources": [{
-    "resources": [
-      "src/inject/*.js",
-      "data/*.json",
-      "assets/fonts/*"
-    ],
-    "matches": [
-      "https://*.netflix.com/*",
-      "https://*.youtube.com/*"
-    ]
-  }],
-  
+
+  "content_scripts": [
+    {
+      "matches": ["https://*.netflix.com/*", "https://*.youtube.com/*"],
+      "js": ["src/content/content-bundle.js"],
+      "css": ["src/ui/styles/overlay.css"],
+      "run_at": "document_start",
+      "all_frames": false
+    }
+  ],
+
+  "web_accessible_resources": [
+    {
+      "resources": ["src/inject/*.js", "data/*.json", "assets/fonts/*"],
+      "matches": ["https://*.netflix.com/*", "https://*.youtube.com/*"]
+    }
+  ],
+
   "action": {
     "default_icon": {
       "16": "assets/icons/icon16.png",
@@ -51,7 +47,7 @@
       "128": "assets/icons/icon128.png"
     }
   },
-  
+
   "content_security_policy": {
     "extension_pages": "script-src 'self'; object-src 'self'"
   }
