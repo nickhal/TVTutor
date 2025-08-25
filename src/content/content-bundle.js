@@ -152,7 +152,6 @@
       // Only append debug div initially
       document.body.appendChild(this.debugDiv);
 
-      console.log("Overlay initialized");
     }
 
     updateDebug(message, isError = false, fullDetails = null) {
@@ -221,7 +220,6 @@
     hideTranslation() {
       this.subtitleDiv.style.display = "none";
       this.lastTranslationShowTime = null;
-      console.log("Translation hidden");
     }
 
     async displaySubtitle(text) {
@@ -232,21 +230,12 @@
           this.subtitleEndTime = performance.now();
           const originalDuration =
             this.subtitleEndTime - this.subtitleStartTime;
-          console.log(
-            `Original subtitle displayed for ${originalDuration.toFixed(0)}ms`
-          );
 
           // If translation is showing, keep it visible for the full original duration
           if (this.lastTranslationShowTime) {
             const translationAge =
               performance.now() - this.lastTranslationShowTime;
             const remainingTime = originalDuration - translationAge;
-
-            console.log(
-              `Translation has been showing for ${translationAge.toFixed(
-                0
-              )}ms, keeping visible for ${remainingTime.toFixed(0)}ms more`
-            );
 
             if (this.displayTimeout) {
               clearTimeout(this.displayTimeout);
@@ -314,19 +303,7 @@
             const apiTime = (performance.now() - apiStart).toFixed(1);
 
             // Log full response for debugging
-            console.log("Chrome API response:", response);
 
-            // Create detailed response info for debugging
-            const responseInfo = {
-              response: response,
-              responseType: typeof response,
-              hasTranslation: !!response?.translation,
-              translationValue: response?.translation,
-              hasError: !!response?.error,
-              errorValue: response?.error,
-              responseKeys: response ? Object.keys(response) : [],
-              fullResponse: JSON.stringify(response, null, 2),
-            };
 
             // Check for different response formats
             if (response) {
@@ -407,14 +384,7 @@
       const netflixContainer = document.querySelector(
         ".player-timedtext-text-container"
       );
-      console.log("Netflix container found:", !!netflixContainer);
-
       if (netflixContainer) {
-        console.log("Netflix container classes:", netflixContainer.className);
-        console.log(
-          "Netflix container parent:",
-          netflixContainer.parentElement
-        );
 
         // Find the video container to insert our translation
         const videoContainer =
@@ -427,9 +397,7 @@
           (!this.subtitleDiv.parentElement ||
             this.subtitleDiv.parentElement !== videoContainer)
         ) {
-          console.log("Inserting translation into video container");
           videoContainer.appendChild(this.subtitleDiv);
-          console.log("Translation div inserted into:", videoContainer);
         }
 
         // Copy Netflix subtitle styling - get from the actual text spans
@@ -445,18 +413,9 @@
         }
         const spanStyle = textSpan ? window.getComputedStyle(textSpan) : null;
 
-        console.log("Netflix font:", netflixStyle.fontFamily);
-        console.log("Container size:", netflixStyle.fontSize);
-        console.log("Text span found:", !!textSpan);
-        if (textSpan) {
-          console.log("Text span content:", textSpan.textContent);
-          console.log("Text span font size:", spanStyle.fontSize);
-        }
-
         // Apply Netflix styling to our translation
         // Get the actual rendered font size from the text span
         const actualFontSize = spanStyle?.fontSize || "42px"; // Default to 42px if not found
-        console.log("Using font size:", actualFontSize);
 
         this.subtitleDiv.style.fontFamily = netflixStyle.fontFamily;
         this.subtitleDiv.style.fontSize =
@@ -470,7 +429,6 @@
 
         // Get text shadow from the actual text span, not container
         const textShadow = spanStyle?.textShadow || netflixStyle.textShadow;
-        console.log("Netflix text shadow:", textShadow);
 
         // Netflix typically uses multiple shadows for a strong outline effect
         this.subtitleDiv.style.textShadow =
@@ -503,30 +461,6 @@
 
         this.subtitleDiv.style.pointerEvents = "none"; // Don't block clicks
         this.subtitleDiv.style.zIndex = "999999"; // High z-index to ensure visibility
-
-        // Log final styles
-        console.log("Translation div styles:", {
-          display: this.subtitleDiv.style.display,
-          position: this.subtitleDiv.style.position,
-          fontSize: this.subtitleDiv.style.fontSize,
-          bottom: this.subtitleDiv.style.bottom,
-          color: this.subtitleDiv.style.color,
-          textShadow: this.subtitleDiv.style.textShadow,
-        });
-      } else {
-        console.warn(
-          "Netflix subtitle container not found! Looking for alternatives..."
-        );
-        // Try alternative selectors
-        const alternatives = [
-          ".player-timedtext",
-          "[class*='timedtext']",
-          "[class*='subtitle']",
-        ];
-        alternatives.forEach((selector) => {
-          const found = document.querySelector(selector);
-          if (found) console.log(`Found with selector ${selector}:`, found);
-        });
       }
 
       // Clear and display the English translation
@@ -546,17 +480,9 @@
         )}..." (${totalTime}ms total)`
       );
 
-      // Calculate how long the translation arrived after the subtitle started
-      const translationDelay = performance.now() - this.subtitleStartTime;
-      console.log(
-        `Translation arrived ${translationDelay.toFixed(
-          0
-        )}ms after subtitle start`
-      );
 
       // Check if translation is identical to original (e.g., names like "Nezuko")
       if (translation.toLowerCase().trim() === text.toLowerCase().trim()) {
-        console.log("Translation identical to original, hiding translation");
         this.subtitleDiv.style.display = "none";
         this.updateDebug("🔄 Translation same as original - hidden");
         return;
@@ -564,17 +490,6 @@
 
       // Display the translation text (simple, Netflix-like)
       this.subtitleDiv.textContent = translation;
-
-      console.log("Translation set:", translation);
-      console.log("Translation div visible:", this.subtitleDiv.style.display);
-      console.log(
-        "Translation div in DOM:",
-        document.contains(this.subtitleDiv)
-      );
-      console.log(
-        "Translation div computed style:",
-        window.getComputedStyle(this.subtitleDiv).display
-      );
     }
 
     translateIndonesian(text) {
@@ -783,7 +698,6 @@
     }
 
     async handleWordClick(word, context) {
-      console.log("Word clicked:", word);
 
       // Create popup
       const existingPopup = document.querySelector(".translation-popup");
@@ -860,7 +774,6 @@
         const checkPlayer = () => {
           const player = document.querySelector(".watch-video");
           if (player) {
-            console.log("Netflix player found");
             resolve();
           } else {
             setTimeout(checkPlayer, 1000);
@@ -874,9 +787,144 @@
       this.callbacks.push(callback);
       this.startObserving();
     }
+    
+    interceptSubtitleRequests() {
+      console.log("🚀 Setting up Netflix subtitle interception...");
+      
+      // Store original fetch
+      const originalFetch = window.fetch;
+      console.log("Original fetch stored:", !!originalFetch);
+      
+      // Override fetch to intercept subtitle requests
+      window.fetch = async function(...args) {
+        const [url] = args;
+        
+        // Log ALL requests to see what's happening
+        if (url && typeof url === 'string') {
+          // Log every 10th request to avoid spam, but always log subtitle-related ones
+          const isSubtitleRelated = url.includes('.vtt') || 
+            url.includes('.ttml') || 
+            url.includes('.dfxp') || 
+            url.includes('timedtext') ||
+            url.includes('subtitle') ||
+            url.includes('/range/') ||
+            url.includes('nflxvideo.net') ||  // Netflix CDN
+            url.includes('/?o=') ||  // Netflix segment parameters
+            url.includes('segment') ||  // Segment-based delivery
+            url.includes('.webvtt') ||
+            url.includes('ttml2');
+          
+          if (isSubtitleRelated) {
+            console.log(`🎬 SUBTITLE request: ${url}`);
+          } else if (Math.random() < 0.1) {  // Sample 10% of other requests
+            console.log(`📡 Sample request: ${url.substring(0, 100)}...`);
+          }
+        }
+        
+        // Check if this might be a subtitle request
+        if (url && (
+          url.includes('.vtt') || 
+          url.includes('.ttml') || 
+          url.includes('.dfxp') || 
+          url.includes('timedtext') ||
+          url.includes('subtitle') ||
+          url.includes('/range/') || // Netflix uses range requests
+          url.includes('nflxvideo.net') ||
+          url.includes('segment') ||
+          url.includes('.webvtt') ||
+          url.includes('ttml2')
+        )) {
+          console.log(`🎯 Processing subtitle: ${url}`);
+          
+          // Make the actual request
+          const response = await originalFetch.apply(this, args);
+          
+          // Clone response to read it without consuming
+          const clonedResponse = response.clone();
+          
+          try {
+            const text = await clonedResponse.text();
+            console.log(`📝 Subtitle content received (${text.length} chars)`);
+            
+            // Parse if it's WebVTT format
+            if (text.includes('WEBVTT')) {
+              console.log("WebVTT format detected");
+              const lines = text.split('\n');
+              let cueCount = 0;
+              lines.forEach(line => {
+                if (line.includes('-->')) {
+                  cueCount++;
+                  if (cueCount <= 5) {
+                    const nextLine = lines[lines.indexOf(line) + 1];
+                    if (nextLine && !nextLine.includes('-->')) {
+                      console.log(`  Cue ${cueCount}: ${nextLine.substring(0, 50)}...`);
+                    }
+                  }
+                }
+              });
+              console.log(`Total cues found: ${cueCount}`);
+            }
+          } catch (e) {
+            console.log("Could not parse subtitle response:", e);
+          }
+          
+          return response;
+        }
+        
+        // For non-subtitle requests, use original fetch
+        return originalFetch.apply(this, args);
+      };
+      
+      // Also intercept XMLHttpRequest
+      const originalXHROpen = XMLHttpRequest.prototype.open;
+      
+      XMLHttpRequest.prototype.open = function(method, url, ...rest) {
+        this._url = url;
+        this._method = method;
+        
+        // Log XHR requests that look like the Netflix range requests
+        if (url && typeof url === 'string') {
+          // Check if it matches the pattern we see in network tab
+          if (url.includes('?o=') && url.includes('&v=')) {
+            console.log(`🎯 Netflix range request: ${url.substring(0, 100)}...`);
+            
+            // Add response listener
+            this.addEventListener('load', function() {
+              const responseText = this.responseText || this.response;
+              if (responseText) {
+                console.log(`📦 Range response received (${responseText.length} bytes)`);
+                
+                // Check if it's subtitle data
+                if (typeof responseText === 'string') {
+                  if (responseText.includes('WEBVTT') || 
+                      responseText.includes('<?xml') || 
+                      responseText.includes('ttml') ||
+                      responseText.includes('<p ') ||
+                      responseText.includes('<span')) {
+                    console.log(`✨ SUBTITLE DATA DETECTED!`);
+                    console.log(`First 500 chars:`, responseText.substring(0, 500));
+                  }
+                }
+              }
+            });
+          }
+        }
+        
+        return originalXHROpen.apply(this, [method, url, ...rest]);
+      };
+      
+      console.log("✅ Interception active. window.fetch overridden:", window.fetch !== originalFetch);
+      
+      // Test the interception
+      setTimeout(() => {
+        console.log("🔍 Testing interception - fetch still overridden:", window.fetch !== originalFetch);
+      }, 3000);
+    }
+    
 
     startObserving() {
-      console.log("Starting Netflix subtitle observation...");
+      // Intercept fetch requests to catch subtitle files
+      this.interceptSubtitleRequests();
 
       // Check for subtitles every 100ms
       this.checkInterval = setInterval(() => {
@@ -931,20 +979,9 @@
         // Check if subtitle changed
         if (subtitleText !== this.lastSubtitle) {
           this.lastSubtitle = subtitleText;
-          if (subtitleText) {
-            console.log("New subtitle detected:");
-            console.log("  Lines found:", lines);
-            console.log("  Final text:", subtitleText);
-          }
 
           // Notify all callbacks
-          this.callbacks.forEach((cb) => {
-            try {
-              cb(subtitleText);
-            } catch (error) {
-              console.error("Error in subtitle callback:", error);
-            }
-          });
+          this.callbacks.forEach((cb) => cb(subtitleText));
         }
       }, 100);
     }
@@ -967,14 +1004,10 @@
     }
 
     async initialize() {
-      console.log("🎬 Indonesian Learning Extension initializing...");
-
       // Detect platform
       this.platform = PlatformDetector.detect();
-      console.log(`Platform detected: ${this.platform}`);
 
       if (!PlatformDetector.isSupported()) {
-        console.log("Platform not supported");
         return;
       }
 
@@ -994,19 +1027,168 @@
         });
       }
 
-      console.log("✅ Extension initialized successfully");
     }
   }
 
-  // Initialize when ready
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", () => {
-      new IndonesianLearningExtension();
-    });
-  } else {
-    // Delay initialization to ensure Netflix is loaded
-    setTimeout(() => {
-      new IndonesianLearningExtension();
-    }, 2000);
-  }
+  // Intercept XHR/fetch IMMEDIATELY before anything else
+  (function interceptEarly() {
+    console.log("🚨 EARLY INTERCEPTION STARTING");
+    
+    // Check for Workers
+    if (typeof Worker !== 'undefined') {
+      console.log("🔧 Workers are available");
+      const originalWorker = Worker;
+      window.Worker = function(...args) {
+        console.log("⚠️ WORKER CREATED:", args[0]);
+        return new originalWorker(...args);
+      };
+    }
+    
+    // Check for iframes and inject interception
+    const injectIntoIframe = (iframe) => {
+      try {
+        const iframeWindow = iframe.contentWindow;
+        if (!iframeWindow) return;
+        
+        console.log(`💉 Injecting into iframe: ${iframe.src || 'same-origin'}`);
+        
+        // Store iframe's originals
+        const iframeOriginalXHROpen = iframeWindow.XMLHttpRequest.prototype.open;
+        const iframeOriginalXHR = iframeWindow.XMLHttpRequest;
+        
+        // Override iframe's XHR
+        let iframeXHRCount = 0;
+        iframeWindow.XMLHttpRequest = function() {
+          iframeXHRCount++;
+          console.log(`🏗️ [IFRAME] XHR constructed (${iframeXHRCount} total)`);
+          return new iframeOriginalXHR();
+        };
+        
+        // Copy properties
+        Object.setPrototypeOf(iframeWindow.XMLHttpRequest, iframeOriginalXHR);
+        Object.setPrototypeOf(iframeWindow.XMLHttpRequest.prototype, iframeOriginalXHR.prototype);
+        
+        // Override iframe's XHR.open
+        iframeWindow.XMLHttpRequest.prototype.open = function(method, url, ...rest) {
+          console.log(`🔴 [IFRAME] XHR.open: ${method} ${url?.substring(0, 150)}`);
+          
+          if (url && url.includes('?o=') && url.includes('&v=')) {
+            console.log(`🎯 [IFRAME] NETFLIX SUBTITLE REQUEST DETECTED!`);
+            
+            this.addEventListener('load', function() {
+              const response = this.responseText || this.response;
+              console.log(`📦 [IFRAME] Response received (${response?.length || 0} bytes)`);
+              
+              // Check for subtitle content
+              if (response && typeof response === 'string') {
+                if (response.includes('<?xml') || response.includes('<tt') || 
+                    response.includes('WEBVTT') || response.includes('<p ')) {
+                  console.log(`✨✨✨ [IFRAME] SUBTITLE DATA FOUND! ✨✨✨`);
+                  console.log(`First 500 chars:`, response.substring(0, 500));
+                }
+              }
+            });
+          }
+          
+          return iframeOriginalXHROpen.apply(this, [method, url, ...rest]);
+        };
+        
+        console.log(`✅ [IFRAME] Interception injected successfully`);
+      } catch (e) {
+        console.log(`❌ Could not inject into iframe:`, e.message);
+      }
+    };
+    
+    // Check for iframes
+    const checkForIframes = () => {
+      const iframes = document.querySelectorAll('iframe');
+      if (iframes.length > 0) {
+        console.log(`📺 Found ${iframes.length} iframes`);
+        iframes.forEach((iframe, i) => {
+          try {
+            if (iframe.contentWindow) {
+              console.log(`  iframe ${i}: ${iframe.src || 'same-origin'}`);
+              injectIntoIframe(iframe);
+            }
+          } catch (e) {
+            console.log(`  iframe ${i}: cross-origin`);
+          }
+        });
+      }
+      
+      // Also watch for new iframes
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          mutation.addedNodes.forEach((node) => {
+            if (node.tagName === 'IFRAME') {
+              console.log('📺 New iframe detected!');
+              setTimeout(() => injectIntoIframe(node), 100);
+            }
+          });
+        });
+      });
+      
+      observer.observe(document.body, { childList: true, subtree: true });
+    };
+    setTimeout(checkForIframes, 2000);
+    
+    // Store originals
+    const originalXHROpen = XMLHttpRequest.prototype.open;
+    const originalFetch = window.fetch;
+    const originalXHR = XMLHttpRequest;
+    
+    // Check if Netflix cached XMLHttpRequest
+    console.log("XMLHttpRequest === original?", XMLHttpRequest === originalXHR);
+    
+    // Override XHR constructor too
+    let xhrCount = 0;
+    window.XMLHttpRequest = function() {
+      xhrCount++;
+      if (xhrCount % 10 === 1) {  // Log every 10th to avoid spam
+        console.log(`🏗️ XHR constructed (${xhrCount} total)`);
+      }
+      return new originalXHR();
+    };
+    
+    // Copy all properties
+    Object.setPrototypeOf(window.XMLHttpRequest, originalXHR);
+    Object.setPrototypeOf(window.XMLHttpRequest.prototype, originalXHR.prototype);
+    
+    // Override XHR open
+    XMLHttpRequest.prototype.open = function(method, url, ...rest) {
+      if (url && typeof url === 'string' && url.includes('?o=')) {
+        console.log(`🔴 XHR.open: ${method} ${url?.substring(0, 100)}`);
+      }
+      return originalXHROpen.apply(this, [method, url, ...rest]);
+    };
+    
+    // Override fetch
+    window.fetch = function(...args) {
+      const [url] = args;
+      if (url && typeof url === 'string' && Math.random() < 0.05) {
+        console.log(`🔵 Fetch sample: ${url?.substring(0, 100)}`);
+      }
+      return originalFetch.apply(this, args);
+    };
+    
+    console.log("✅ EARLY INTERCEPTION COMPLETE");
+    
+    // Monitor prototype changes
+    let checkCount = 0;
+    const checkPrototype = setInterval(() => {
+      checkCount++;
+      if (XMLHttpRequest.prototype.open !== originalXHROpen) {
+        if (checkCount === 1 || checkCount % 10 === 0) {
+          console.log(`✅ XHR.open still overridden (check ${checkCount})`);
+        }
+      } else {
+        console.log(`❌ XHR.open was restored!`);
+        clearInterval(checkPrototype);
+      }
+      if (checkCount > 30) clearInterval(checkPrototype);
+    }, 1000);
+  })();
+  
+  // Then initialize the extension
+  new IndonesianLearningExtension();
 })();
